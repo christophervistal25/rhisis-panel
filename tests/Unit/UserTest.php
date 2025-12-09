@@ -1,5 +1,7 @@
 <?php
 
+use App\Actions\Users\CreateUser;
+use App\Actions\Users\GetAllUsers;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -211,8 +213,8 @@ it('can check if the users table uses default Laravel timestamps behavior with c
 // Get All the users order by created_at descending
 it('can get all users ordered by created_at descending', function () {
     User::factory()->count(5)->create();
-
-    $users = User::orderBy('created_at', 'desc')->get();
+    $action = app(GetAllUsers::class);
+    $users = $action->get();
 
     expect($users->count())->toBe(5);
     expect($users->first()->created_at)->toBeGreaterThanOrEqual($users->last()->created_at);
@@ -240,10 +242,12 @@ it('can ensure that email columns is unique when creating multiple users', funct
 
 // Ensure that password is hashed when creating a user
 it('can ensure that all passswords stored in the password columnn is not plain-text', function () {
-    $user = User::factory()->create([
-        'password' => 'my-plain-text-password',
+    $action = app(CreateUser::class);
+    $user = $action->create([
+        'username' => 'tooshort01',
+        'email' => 'test@example.com',
+        'password' => 'my-plain-text-password'
     ]);
 
     expect($user->password)->not->toBe('my-plain-text-password');
 });
-
